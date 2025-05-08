@@ -15,7 +15,7 @@
             justify-content: center;
             height: 80vh;
             background-color: #f4f4f4;
-            /*padding-top: 30px;  Push content down so it's not hidden under the banner */
+            padding-top: 100px;  /*Push content down so it's not hidden under the banner */
         }
         h2 {
             font-size: 2rem;
@@ -199,160 +199,159 @@
         DSA - Robotmaster Deburring Utility Processor
         <div class="credit">&copy; Steven Lee - Email: leechunju1608@gmail.com</div>
     </div>
-    <div class="main-content">
-        <div class="controls">
-            <div>
-                <input type="file" id="fileInput" onchange="uploadFile()">
-            </div>
-            <div>
-                <button onclick="processFile()">Apply</button>
-            </div>
-            <button onclick="saveFile()">Save</button>
-            <button onclick="window.location.href='../index.html'">Return</button>
+    
+    <div class="controls">
+        <div>
+            <input type="file" id="fileInput" onchange="uploadFile()">
+        </div>
+        <div>
+            <button onclick="processFile()">Apply</button>
+        </div>
+        <button onclick="saveFile()">Save</button>
+        <button onclick="window.location.href='../index.html'">Return</button>
+    </div>
+    
+    <div class="dropdowns">
+        <div>
+            <label for="moveAbs">MoveAbsJ Speed:</label>
+            <select id="moveAbs">
+                <option value="speed1">speed1</option>
+                <option value="speed2">speed2</option>
+                <option value="speed3">speed3</option>
+                <option value="speed4">speed4</option>
+                <option value="speed5">speed5</option>
+                <option value="speed6">speed6</option>
+            </select>
+        </div>
+        <div>
+            <label for="moveJ">MoveJ Speed:</label>
+            <select id="moveJ">
+                <option value="speed1">speed1</option>
+                <option value="speed2">speed2</option>
+                <option value="speed3">speed3</option>
+                <option value="speed4">speed4</option>
+                <option value="speed5">speed5</option>
+                <option value="speed6">speed6</option>
+            </select>
+        </div>
+        <div>
+            <label for="moveL">MoveL Speed:</label>
+            <select id="moveL">
+                <option value="Grinding_Speed_Fine">Grinding_Speed_Fine</option>
+                <option value="speed1">speed1</option>
+                <option value="speed2">speed2</option>
+                <option value="speed3">speed3</option>
+                <option value="speed4">speed4</option>
+                <option value="speed5">speed5</option>
+                <option value="speed6">speed6</option>
+            </select>
+        </div>
+        <div>
+            <label for="moveC">MoveC Speed:</label>
+            <select id="moveC">
+                <option value="Grinding_Speed_Fine">Grinding_Speed_Fine</option>
+                <option value="speed1">speed1</option>
+                <option value="speed2">speed2</option>
+                <option value="speed3">speed3</option>
+                <option value="speed4">speed4</option>
+                <option value="speed5">speed5</option>
+                <option value="speed6">speed6</option>
+            </select>
         </div>
         
-        <div class="dropdowns">
-            <div>
-                <label for="moveAbs">MoveAbsJ Speed:</label>
-                <select id="moveAbs">
-                    <option value="speed1">speed1</option>
-                    <option value="speed2">speed2</option>
-                    <option value="speed3">speed3</option>
-                    <option value="speed4">speed4</option>
-                    <option value="speed5">speed5</option>
-                    <option value="speed6">speed6</option>
-                </select>
-            </div>
-            <div>
-                <label for="moveJ">MoveJ Speed:</label>
-                <select id="moveJ">
-                    <option value="speed1">speed1</option>
-                    <option value="speed2">speed2</option>
-                    <option value="speed3">speed3</option>
-                    <option value="speed4">speed4</option>
-                    <option value="speed5">speed5</option>
-                    <option value="speed6">speed6</option>
-                </select>
-            </div>
-            <div>
-                <label for="moveL">MoveL Speed:</label>
-                <select id="moveL">
-                    <option value="Grinding_Speed_Fine">Grinding_Speed_Fine</option>
-                    <option value="speed1">speed1</option>
-                    <option value="speed2">speed2</option>
-                    <option value="speed3">speed3</option>
-                    <option value="speed4">speed4</option>
-                    <option value="speed5">speed5</option>
-                    <option value="speed6">speed6</option>
-                </select>
-            </div>
-            <div>
-                <label for="moveC">MoveC Speed:</label>
-                <select id="moveC">
-                    <option value="Grinding_Speed_Fine">Grinding_Speed_Fine</option>
-                    <option value="speed1">speed1</option>
-                    <option value="speed2">speed2</option>
-                    <option value="speed3">speed3</option>
-                    <option value="speed4">speed4</option>
-                    <option value="speed5">speed5</option>
-                    <option value="speed6">speed6</option>
-                </select>
-            </div>
-            
-            <div>
-                <label for="zoneAbs">MoveAbsJ Zone:</label>
-                <select id="zoneAbs">
-                    <option value="z0">z0</option>
-                    <option value="z1">z1</option>
-                    <option value="z5">z5</option>
-                    <option value="z10">z10</option>
-                    <option value="z50">z50</option>
-                    <option value="z100">z100</option>
-                    <option value="z200">z200</option>
-                    <option value="fine">fine</option>
-                </select>
-            </div>
-            <div>
-                <label for="zoneJ">MoveJ Zone:</label>
-                <select id="zoneJ">
-                    <option value="z0">z0</option>
-                    <option value="z1">z1</option>
-                    <option value="z5">z5</option>
-                    <option value="z10">z10</option>
-                    <option value="z50">z50</option>
-                    <option value="z100">z100</option>
-                    <option value="z200">z200</option>
-                    <option value="fine">fine</option>
-                </select>
-            </div>
-            <div>
-                <label for="zoneL">MoveL Zone:</label>
-                <select id="zoneL">
-                    <option value="z0">z0</option>
-                    <option value="z1">z1</option>
-                    <option value="z5">z5</option>
-                    <option value="z10">z10</option>
-                    <option value="z50">z50</option>
-                    <option value="z100">z100</option>
-                    <option value="z200">z200</option>
-                    <option value="fine">fine</option>
-                </select>
-            </div>
-            <div>
-                <label for="zoneC">MoveC Zone:</label>
-                <select id="zoneC">
-                    <option value="z0">z0</option>
-                    <option value="z1">z1</option>
-                    <option value="z5">z5</option>
-                    <option value="z10">z10</option>
-                    <option value="z50">z50</option>
-                    <option value="z100">z100</option>
-                    <option value="z200">z200</option>
-                    <option value="fine">fine</option>
-                </select>
-            </div>
-            <div>
-                <label for="tool">Tool:</label>
-                <select id="tool">
-                    <option value="Up_Left_Tool_Adj">Up_Left_Tool_Adj</option>
-                    <option value="Down_Right_Tool_Adj">Down_Right_Tool_Adj</option>
-                    <option value="Down_Right_Tool_Adj">Up_Right_Tool_Adj</option>
-                    <option value="Down_Right_Tool_Adj">Down_Left_Tool_Adj</option>
-                    <option value="Down_Right_Tool_Adj">tool1_Adj</option>
-                    <option value="Down_Right_Tool_Adj">tool2_Adj</option>
-                    <option value="Down_Right_Tool_Adj">tool3_Adj</option>
-                    <option value="Down_Right_Tool_Adj">tool4_Adj</option>
-                </select>
-            </div>
-            <div>
-                <label for="userframe">Wobj:</label>
-                <select id="userframe">
-                    <option value="Rob_Hold_Wobj_Adj">Rob_Hold_Wobj_Adj</option>
-                </select>
+        <div>
+            <label for="zoneAbs">MoveAbsJ Zone:</label>
+            <select id="zoneAbs">
+                <option value="z0">z0</option>
+                <option value="z1">z1</option>
+                <option value="z5">z5</option>
+                <option value="z10">z10</option>
+                <option value="z50">z50</option>
+                <option value="z100">z100</option>
+                <option value="z200">z200</option>
+                <option value="fine">fine</option>
+            </select>
+        </div>
+        <div>
+            <label for="zoneJ">MoveJ Zone:</label>
+            <select id="zoneJ">
+                <option value="z0">z0</option>
+                <option value="z1">z1</option>
+                <option value="z5">z5</option>
+                <option value="z10">z10</option>
+                <option value="z50">z50</option>
+                <option value="z100">z100</option>
+                <option value="z200">z200</option>
+                <option value="fine">fine</option>
+            </select>
+        </div>
+        <div>
+            <label for="zoneL">MoveL Zone:</label>
+            <select id="zoneL">
+                <option value="z0">z0</option>
+                <option value="z1">z1</option>
+                <option value="z5">z5</option>
+                <option value="z10">z10</option>
+                <option value="z50">z50</option>
+                <option value="z100">z100</option>
+                <option value="z200">z200</option>
+                <option value="fine">fine</option>
+            </select>
+        </div>
+        <div>
+            <label for="zoneC">MoveC Zone:</label>
+            <select id="zoneC">
+                <option value="z0">z0</option>
+                <option value="z1">z1</option>
+                <option value="z5">z5</option>
+                <option value="z10">z10</option>
+                <option value="z50">z50</option>
+                <option value="z100">z100</option>
+                <option value="z200">z200</option>
+                <option value="fine">fine</option>
+            </select>
+        </div>
+        <div>
+            <label for="tool">Tool:</label>
+            <select id="tool">
+                <option value="Up_Left_Tool_Adj">Up_Left_Tool_Adj</option>
+                <option value="Down_Right_Tool_Adj">Down_Right_Tool_Adj</option>
+                <option value="Down_Right_Tool_Adj">Up_Right_Tool_Adj</option>
+                <option value="Down_Right_Tool_Adj">Down_Left_Tool_Adj</option>
+                <option value="Down_Right_Tool_Adj">tool1_Adj</option>
+                <option value="Down_Right_Tool_Adj">tool2_Adj</option>
+                <option value="Down_Right_Tool_Adj">tool3_Adj</option>
+                <option value="Down_Right_Tool_Adj">tool4_Adj</option>
+            </select>
+        </div>
+        <div>
+            <label for="userframe">Wobj:</label>
+            <select id="userframe">
+                <option value="Rob_Hold_Wobj_Adj">Rob_Hold_Wobj_Adj</option>
+            </select>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div>
+            <h3>Uploaded File</h3>
+            <div class="window" id="uploadWindow">
+                <pre id="fileContent"></pre>
             </div>
         </div>
-        
-        <div class="container">
-            <div>
-                <h3>Uploaded File</h3>
-                <div class="window" id="uploadWindow">
-                    <pre id="fileContent"></pre>
-                </div>
-            </div>
-            <div>
-                <h3>Processed File</h3>
-                <div class="window" id="processWindow">
-                    <pre id="processedContent"></pre>
-                </div>
+        <div>
+            <h3>Processed File</h3>
+            <div class="window" id="processWindow">
+                <pre id="processedContent"></pre>
             </div>
         </div>
+    </div>
 
-        <div id="myModal">
-            <div id="modalContent">
-              <canvas id="matrixCanvas"></canvas>
-              <br>
-              <button id="closeBtn" onclick="closeModal()">Close</button>
-            </div>
+    <div id="myModal">
+        <div id="modalContent">
+          <canvas id="matrixCanvas"></canvas>
+          <br>
+          <button id="closeBtn" onclick="closeModal()">Close</button>
         </div>
     </div>
 
@@ -710,15 +709,6 @@
         function closeModal() {
           document.getElementById('myModal').style.display = 'none';
         }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            const banner = document.querySelector('.banner');
-            const mainContent = document.querySelector('.main-content');
-            if (banner && mainContent) {
-                const bannerHeight = banner.offsetHeight;
-                mainContent.style.marginTop = bannerHeight + 'px';
-            }
-        });
         
     </script>
 </body>
