@@ -15,12 +15,17 @@
             justify-content: center;
             height: 80vh;
             background-color: #f4f4f4;
-            padding-top: 30px; /* Push content down so it's not hidden under the banner */
+            /*padding-top: 30px;  Push content down so it's not hidden under the banner */
         }
         h2 {
             font-size: 2rem;
             margin-bottom: 20px;
             color: #333;
+        }
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         .controls {
             display: flex;
@@ -183,127 +188,129 @@
         DTboost - Robotmaster Laser Cutting Utility Processor
         <div class="credit">&copy; Steven Lee - Email: leechunju1608@gmail.com</div>
     </div>
-    <div class="controls">
-        <div>
-            <input type="file" id="fileInput" onchange="uploadFile()">
-        </div>
-        <div>
-            <button onclick="processFile()">Apply</button>
-        </div>
-        <button onclick="saveFile()">Save</button>
-        <button onclick="window.location.href='../index.html'">Return</button>
-    </div>
-    
-    <div class="dropdowns">
-        <div>
-            <label for="moveAbs">MoveAbsJ Speed:</label>
-            <select id="moveAbs">
-                <option value="v100">v100</option>
-                <option value="v200">v200</option>
-                <option value="v300">v300</option>
-                <option value="v400">v400</option>
-                <option value="v500">v500</option>
-            </select>
-        </div>
-        <div>
-            <label for="moveJ">MoveJ Speed:</label>
-            <select id="moveJ">
-                <option value="v100">v100</option>
-                <option value="v200">v200</option>
-                <option value="v300">v300</option>
-                <option value="v400">v400</option>
-                <option value="v500">v500</option>
-            </select>
-        </div>
-        <div>
-            <label for="moveL">MoveL Speed:</label>
-            <select id="moveL">
-                <option value="vcustom">vcustom</option>
-                <option value="v100">v100</option>
-                <option value="v200">v200</option>
-                <option value="v300">v300</option>
-                <option value="v400">v400</option>
-                <option value="v500">v500</option>
-            </select>
-        </div>
-        <div>
-            <label for="rotaryStation">Rotary:</label>
-            <select id="rotaryStation">
-                <option value="wobj1">STN1 (L)</option>
-                <option value="wobj2">STN2 (R)</option>
-            </select>
+    <div class="main-content">
+        <div class="controls">
+            <div>
+                <input type="file" id="fileInput" onchange="uploadFile()">
+            </div>
+            <div>
+                <button onclick="processFile()">Apply</button>
+            </div>
+            <button onclick="saveFile()">Save</button>
+            <button onclick="window.location.href='../index.html'">Return</button>
         </div>
         
-        <div>
-            <label for="zoneAbs">MoveAbsJ Zone:</label>
-            <select id="zoneAbs">
-                <option value="z0">z0</option>
-                <option value="z1">z1</option>
-                <option value="z5">z5</option>
-                <option value="z10">z10</option>
-                <option value="fine">fine</option>
-            </select>
-        </div>
-        <div>
-            <label for="zoneJ">MoveJ Zone:</label>
-            <select id="zoneJ">
-                <option value="z0">z0</option>
-                <option value="z1">z1</option>
-                <option value="z5">z5</option>
-                <option value="z10">z10</option>
-                <option value="fine">fine</option>
-            </select>
-        </div>
-        <div>
-            <label for="zoneL">MoveL Zone:</label>
-            <select id="zoneL">
-                <option value="z0">z0</option>
-                <option value="z1">z1</option>
-                <option value="z5">z5</option>
-                <option value="z10">z10</option>
-                <option value="fine">fine</option>
-            </select>
-        </div>
+        <div class="dropdowns">
+            <div>
+                <label for="moveAbs">MoveAbsJ Speed:</label>
+                <select id="moveAbs">
+                    <option value="v100">v100</option>
+                    <option value="v200">v200</option>
+                    <option value="v300">v300</option>
+                    <option value="v400">v400</option>
+                    <option value="v500">v500</option>
+                </select>
+            </div>
+            <div>
+                <label for="moveJ">MoveJ Speed:</label>
+                <select id="moveJ">
+                    <option value="v100">v100</option>
+                    <option value="v200">v200</option>
+                    <option value="v300">v300</option>
+                    <option value="v400">v400</option>
+                    <option value="v500">v500</option>
+                </select>
+            </div>
+            <div>
+                <label for="moveL">MoveL Speed:</label>
+                <select id="moveL">
+                    <option value="vcustom">vcustom</option>
+                    <option value="v100">v100</option>
+                    <option value="v200">v200</option>
+                    <option value="v300">v300</option>
+                    <option value="v400">v400</option>
+                    <option value="v500">v500</option>
+                </select>
+            </div>
+            <div>
+                <label for="rotaryStation">Rotary:</label>
+                <select id="rotaryStation">
+                    <option value="wobj1">STN1 (L)</option>
+                    <option value="wobj2">STN2 (R)</option>
+                </select>
+            </div>
+            
+            <div>
+                <label for="zoneAbs">MoveAbsJ Zone:</label>
+                <select id="zoneAbs">
+                    <option value="z0">z0</option>
+                    <option value="z1">z1</option>
+                    <option value="z5">z5</option>
+                    <option value="z10">z10</option>
+                    <option value="fine">fine</option>
+                </select>
+            </div>
+            <div>
+                <label for="zoneJ">MoveJ Zone:</label>
+                <select id="zoneJ">
+                    <option value="z0">z0</option>
+                    <option value="z1">z1</option>
+                    <option value="z5">z5</option>
+                    <option value="z10">z10</option>
+                    <option value="fine">fine</option>
+                </select>
+            </div>
+            <div>
+                <label for="zoneL">MoveL Zone:</label>
+                <select id="zoneL">
+                    <option value="z0">z0</option>
+                    <option value="z1">z1</option>
+                    <option value="z5">z5</option>
+                    <option value="z10">z10</option>
+                    <option value="fine">fine</option>
+                </select>
+            </div>
 
-        <div class="tool">
-            <label for="tool">Tool:</label>
-            <input type="text" id="tool" value="GunTool">
-        </div>
+            <div class="tool">
+                <label for="tool">Tool:</label>
+                <input type="text" id="tool" value="GunTool">
+            </div>
 
-        <div class="laser_spd_par">
-            <label for="laser_spd_par">Laser Speed Parameter:</label>
-            <input type="text" id="laser_spd_par" value="1" style="width: 10px; height: 10px;">
-        </div>
-        <div class="laser_pch_par">
-            <label for="laser_pch_par">Laser Punch Parameter:</label>
-            <input type="text" id="laser_pch_par" value="1" style="width: 10px; height: 10px;">
-        </div>
-        <div class="laser_prc_par">
-            <label for="laser_prc_par">Laser Process Parameter:</label>
-            <input type="text" id="laser_prc_par" value="1" style="width: 10px; height: 10px;">
-        </div>
-    </div>
-    
-    <div class="container">
-        <div>
-            <h3>Uploaded File</h3>
-            <div class="window" id="uploadWindow">
-                <pre id="fileContent"></pre>
+            <div class="laser_spd_par">
+                <label for="laser_spd_par">Laser Speed Parameter:</label>
+                <input type="text" id="laser_spd_par" value="1" style="width: 10px; height: 10px;">
+            </div>
+            <div class="laser_pch_par">
+                <label for="laser_pch_par">Laser Punch Parameter:</label>
+                <input type="text" id="laser_pch_par" value="1" style="width: 10px; height: 10px;">
+            </div>
+            <div class="laser_prc_par">
+                <label for="laser_prc_par">Laser Process Parameter:</label>
+                <input type="text" id="laser_prc_par" value="1" style="width: 10px; height: 10px;">
             </div>
         </div>
-        <div>
-            <h3>Processed File</h3>
-            <div class="window" id="processWindow">
-                <pre id="processedContent"></pre>
+        
+        <div class="container">
+            <div>
+                <h3>Uploaded File</h3>
+                <div class="window" id="uploadWindow">
+                    <pre id="fileContent"></pre>
+                </div>
+            </div>
+            <div>
+                <h3>Processed File</h3>
+                <div class="window" id="processWindow">
+                    <pre id="processedContent"></pre>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div id="myModal">
-        <div id="modalContent">
-          <canvas id="matrixCanvas"></canvas>
-          <br>
-          <button id="closeBtn" onclick="closeModal()">Close</button>
+        <div id="myModal">
+            <div id="modalContent">
+              <canvas id="matrixCanvas"></canvas>
+              <br>
+              <button id="closeBtn" onclick="closeModal()">Close</button>
+            </div>
         </div>
     </div>
 
@@ -747,8 +754,15 @@
           document.getElementById('myModal').style.display = 'none';
         }
 
+        window.addEventListener('DOMContentLoaded', () => {
+            const banner = document.querySelector('.banner');
+            const mainContent = document.querySelector('.main-content');
+            if (banner && mainContent) {
+                const bannerHeight = banner.offsetHeight;
+                mainContent.style.marginTop = bannerHeight + 'px';
+            }
+        });
 
-        
     </script>
 </body>
 </html>
