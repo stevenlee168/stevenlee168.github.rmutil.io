@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Deburring Utility</title>
+    <title>Robot Hold Deburring Utility</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -197,10 +197,9 @@
 </head>
 <body>
     <div class="banner">
-        DSA - Robotmaster RBT Hold Deburring Utility Processor
+        DSA - Robotmaster Deburring Utility Processor
         <div class="credit">&copy; Steven Lee - Email: leechunju1608@gmail.com</div>
     </div>
-    
     <div class="controls">
         <div>
             <input type="file" id="fileInput" onchange="uploadFile()">
@@ -237,27 +236,11 @@
         </div>
         <div>
             <label for="moveL">MoveL Speed:</label>
-            <select id="moveL">
-                <option value="Grinding_Speed_Fine">Grinding_Speed_Fine</option>
-                <option value="speed1">speed1</option>
-                <option value="speed2">speed2</option>
-                <option value="speed3">speed3</option>
-                <option value="speed4">speed4</option>
-                <option value="speed5">speed5</option>
-                <option value="speed6">speed6</option>
-            </select>
+            <input type="text" id="moveL" value="Grinding_Speed_Fine" style="width: 100px; height: 20px;">
         </div>
         <div>
             <label for="moveC">MoveC Speed:</label>
-            <select id="moveC">
-                <option value="Grinding_Speed_Fine">Grinding_Speed_Fine</option>
-                <option value="speed1">speed1</option>
-                <option value="speed2">speed2</option>
-                <option value="speed3">speed3</option>
-                <option value="speed4">speed4</option>
-                <option value="speed5">speed5</option>
-                <option value="speed6">speed6</option>
-            </select>
+            <input type="text" id="moveC" value="Grinding_Speed_Fine" style="width: 100px; height: 20px;">
         </div>
         
         <div>
@@ -314,22 +297,12 @@
         </div>
         <div>
             <label for="tool">Tool:</label>
-            <select id="tool">
-                <option value="Up_Left_Tool_Adj">Up_Left_Tool_Adj</option>
-                <option value="Down_Right_Tool_Adj">Down_Right_Tool_Adj</option>
-                <option value="Down_Right_Tool_Adj">Up_Right_Tool_Adj</option>
-                <option value="Down_Right_Tool_Adj">Down_Left_Tool_Adj</option>
-                <option value="Down_Right_Tool_Adj">tool1_Adj</option>
-                <option value="Down_Right_Tool_Adj">tool2_Adj</option>
-                <option value="Down_Right_Tool_Adj">tool3_Adj</option>
-                <option value="Down_Right_Tool_Adj">tool4_Adj</option>
+                <input type="text" id="tool" value="Tool" style="width: 100px; height: 20px;">
             </select>
         </div>
         <div>
             <label for="userframe">Wobj:</label>
-            <select id="userframe">
-                <option value="Rob_Hold_Wobj_Adj">Rob_Hold_Wobj_Adj</option>
-            </select>
+                <input type="text" id="userframe" value="Rob_Hold_Wobj_Adj" style="width: 100px; height: 20px;">
         </div>
     </div>
     
@@ -535,10 +508,10 @@
                 let zoneMoveJ = document.getElementById("zoneJ").value;
                 let zoneMoveL = document.getElementById("zoneL").value;
                 let zoneMoveC = document.getElementById("zoneC").value;
-                let tool = document.getElementById("tool").value;
+                let tool = document.getElementById("tool").value + '_Adj';
                 let selectedWobj = document.getElementById("userframe").value;
-                let tool_adj = document.getElementById("tool").value;
-                let tool_og = document.getElementById("tool").value.split("_Adj")[0];
+                let tool_adj = document.getElementById("tool").value + '_Adj';
+                let tool_og = document.getElementById("tool").value;
 
                 let processedText = uploadedText.replace(/PERS.*/g, '!===============================================================');
 
@@ -569,7 +542,7 @@
                 );
 
                 // Update Tool
-                processedText = processedText.replace(/Tool:=\S+;/, `Tool:=${tool};`);
+                //processedText = processedText.replace(/Tool:=\S+;/, `Tool:=${tool};`);
 
                 // Add Tool Adj if there's a comment
                 processedText = addToolAdj(processedText,tool_adj,tool_og);
@@ -710,6 +683,8 @@
         function closeModal() {
           document.getElementById('myModal').style.display = 'none';
         }
+
+
         
     </script>
 </body>
