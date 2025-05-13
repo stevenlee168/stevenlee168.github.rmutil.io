@@ -61,7 +61,7 @@
             margin-bottom: 5px;
             font-size: 1rem;
         }
-        .dropdowns select, .tool input, .laser_spd_par input, .laser_pch_par input, .laser_prc_par input{
+        .dropdowns select, .tool input, .laser_spd_par input, .laser_pch_par input, .laser_prc_par input, .advanced-options input{
             padding: 8px;
             font-size: 1rem;
             border: 2px solid #ccc;
@@ -182,6 +182,33 @@
           padding: 5px 10px;
         }
 
+        .advance-mode-wrapper {
+          grid-column: span 2; /* Span 2 columns in grid */
+          display: flex;
+          align-items: center;
+          flex-direction: row;
+          gap: 20px;
+        }
+
+        .advance-label {
+          font-weight: bold;
+          white-space: nowrap;
+        }
+
+        #advanced-options {
+          display: none;
+          flex-direction: row;
+          align-items: center;
+          gap: 20px;
+        }
+        
+        #advanced-options label {
+          font-weight: bold;
+          display: block;
+          align-items: center;
+          gap: 20px;
+        }
+
     </style>
 </head>
 <body>
@@ -289,6 +316,24 @@
             <input type="text" id="laser_prc_par" value="1" style="width: 10px; height: 10px;">
         </div>
     </div>
+
+    <div class="advance-mode-wrapper">
+        <label class="advance-label">
+            <input type="checkbox" id="advanceModeCheckbox">
+            Advance Mode
+        </label>
+        
+            <div id="advanced-options">
+                <label>
+                    0 Degree:
+                    <input type="text" id="zeroDegree" value="0" style="width: 30px; height: 10px;">
+                </label>
+                <label>
+                    180 Degree:
+                    <input type="text" id="oneEightyDegree" value="0" style="width: 30px; height: 10px;">
+                </label>
+            </div>
+        </div>
     
     <div class="container">
         <div>
@@ -486,7 +531,9 @@
                 let speedMoveAbs = document.getElementById("moveAbs").value; 
                 let speedMoveJ = document.getElementById("moveJ").value;
                 let speedMoveL = document.getElementById("moveL").value;
-                let selectedWobj = document.getElementById("rotaryStation").value;
+                let selectedWobj = 0;
+                let selectedWobj_og = document.getElementById("rotaryStation").value;
+                let selectedWobj_adj = document.getElementById("rotaryStation").value + '_Adj';
                 
                 let zoneMoveAbs = document.getElementById("zoneAbs").value;
                 let zoneMoveJ = document.getElementById("zoneJ").value;
@@ -495,6 +542,17 @@
                 let laser_spd_par = document.getElementById("laser_spd_par").value;
                 let laser_pch_par = document.getElementById("laser_pch_par").value;
                 let laser_prc_par = document.getElementById("laser_prc_par").value;
+
+                const advanceCheckbox = document.getElementById("advanceModeCheckbox");
+                const isAdvanceMode = advanceCheckbox ? advanceCheckbox.checked : false
+
+                if (isAdvanceMode){
+                    selectedWobj=selectedWobj_adj;
+                }
+
+                else{
+                    selectedWobj=selectedWobj_og;
+                }
 
                 let processedText = uploadedText.replace(/PERS.*/g, '!===============================================================');
 
@@ -526,7 +584,7 @@
                 processedText = processedText.replace(/Tool:=\S+;/, `Tool:=${tool};`);
 
                 // Add Laser_Speed_Param_In 1 if there's a comment and a following MoveJ
-                processedText = addLaserSpeedParam(processedText,laser_spd_par);
+                processedText = addLaserSpeedParam(processedText,laser_spd_par,selectedWobj_og,selectedWobj_adj);
 
                 // Add Laser_Punch_Param_In 1 if previous line is a MoveJ and the next line is another MoveL
                 processedText = addLaserPunchParam(processedText,laser_pch_par);
@@ -589,12 +647,28 @@
             const lines = text.split("\n");
             let newText = "";
 
+            // Defensive check: ensure checkbox exists
+            const advanceCheckbox = document.getElementById("advanceModeCheckbox");
+            const isAdvanceMode = advanceCheckbox ? advanceCheckbox.checked : false;
+            let ZeroDegree_Off = document.getElementById("zeroDegree").value;
+            let OneEightyDegree_Off = document.getElementById("oneEightyDegree").value;
+            let Z_Off = 0;
+
             for (let i = 0; i < lines.length; i++) {
                 newText += lines[i] + "\n"; // Add current line
 
                 if (lines[i].trim().startsWith("!")) {
                     // If the current line is a comment
                     if (i + 1 < lines.length && lines[i + 1].includes("MoveJ")) {
+                        if (isAdvanceMode) {
+                            if (lines[i].trim().startsWith("! --- 180")){
+                                Z_Off = OneEightyDegree_Off;
+                            }
+                            else{
+                                Z_Off = ZeroDegree_Off;
+                            }
+                            newText += `    <span class="highlight">${uf_adj}:=Modify_DYN_Wobj_Offset(${uf},0,0,${Z_Off},0,0,0);</span>\n`;  // Add Modify_Adj; if checkbox is checked
+                        }
                         newText += `    <span class="highlight">Laser_Speed_Param_In ${laser_spd_par};</span>\n`;  // Insert Laser_Speed_Param_In 1;
                     }
                 }
