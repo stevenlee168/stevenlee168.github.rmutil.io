@@ -678,7 +678,7 @@
                     processedText = processedText.replace(/Laser_Punch_Cir_Param_In/g, "!Laser_Punch_Cir_Param_In");
                     processedText = processedText.replace(/Laser_Process_Param_In/g, "!Laser_Process_Param_In");
                     processedText = processedText.replace(/Laser_Off/g, "!Laser_Off");
-
+                    processedText = processedText.replace(/! ---/g, "Stop;\n    !---");
                 }
 
                 document.getElementById("processedContent").textContent = processedText;
