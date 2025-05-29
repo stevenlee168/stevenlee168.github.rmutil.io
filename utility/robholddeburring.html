@@ -587,7 +587,7 @@
 
                 if (lines[i].trim().startsWith("! ---")) {
                     // If the current line is a comment
-                        newText += `    <span class="highlight">${tool_adj}:=Modify_rTCP_Offset(${tool_og},0,0,0,0,0,0);</span>\n`;  // Insert Tool_Adj:=Modify_rTCP_Offset(Tool,0,0,0,0,0,0);
+                        newText += `    <span class="highlight">${tool_adj}:=Modify_rTCP_Offset(${tool_og},0,0,0,0,0,0);</span>`;  // Insert Tool_Adj:=Modify_rTCP_Offset(Tool,0,0,0,0,0,0);
                 }
             }
             return newText;
