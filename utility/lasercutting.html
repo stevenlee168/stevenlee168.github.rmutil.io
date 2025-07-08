@@ -575,6 +575,7 @@
                 reader.onload = function(event) {
                     uploadedText = event.target.result;
                     document.getElementById("fileContent").textContent = uploadedText;
+                    displayCommentTable(uploadedText);
                 };
                 reader.readAsText(file);
             }
@@ -602,6 +603,7 @@
 
                 const testprogramCheckbox = document.getElementById("testprogramModeCheckbox");
                 const istestprogramMode = testprogramCheckbox ? testprogramCheckbox.checked : false;
+                const paramMap = getParameterMapFromTable();
 
                 if (isAdvanceMode){
                     selectedWobj=selectedWobj_adj;
@@ -641,13 +643,17 @@
                 //processedText = processedText.replace(/Tool:=\S+;/, `Tool:=${tool};`);
 
                 // Add Laser_Speed_Param_In 1 if there's a comment and a following MoveJ
-                processedText = addLaserSpeedParam(processedText,laser_spd_par,selectedWobj_og,selectedWobj_adj);
+                //processedText = addLaserSpeedParam(processedText,laser_spd_par,selectedWobj_og,selectedWobj_adj);
+                processedText = addLaserSpeedParam(processedText, paramMap, selectedWobj_og, selectedWobj_adj, laser_spd_par);
 
                 // Add Laser_Punch_Param_In 1 if previous line is a MoveJ and the next line is another MoveL
-                processedText = addLaserPunchParam(processedText,laser_pch_par);
+                //processedText = addLaserPunchParam(processedText,laser_pch_par);
+                processedText = addLaserPunchParam(processedText, paramMap, laser_pch_par);
 
                 // Add Laser_Process_Param_In 1 if previous line is a Laser_Punch_Param_In and the next line is another MoveL
-                processedText = addLaserProcessParam(processedText,laser_prc_par);
+                //processedText = addLaserProcessParam(processedText,laser_prc_par);
+                processedText = addLaserProcessParam(processedText, paramMap, laser_prc_par);
+
 
                 processedText = addLaserOff(processedText);
 
@@ -680,6 +686,7 @@
                     processedText = processedText.replace(/Laser_Process_Param_In/g, "!Laser_Process_Param_In");
                     processedText = processedText.replace(/Laser_Off/g, "!Laser_Off");
                     processedText = processedText.replace(/! ---/g, "Stop;\n    !---");
+
                 }
 
                 document.getElementById("processedContent").textContent = processedText;
@@ -726,87 +733,119 @@
         }
 
         // Function to add Laser_Speed_Param_In 1; after comments and MoveJ
-        function addLaserSpeedParam(text,laser_spd_par,uf,uf_adj) {
+        function addLaserSpeedParam(text,paramMap,uf,uf_adj,laser_spd_par) {
             const lines = text.split("\n");
             let newText = "";
-            
-            // Defensive check: ensure checkbox exists
+            let currentSection = "";
+
             const advanceCheckbox = document.getElementById("advanceModeCheckbox");
             const isAdvanceMode = advanceCheckbox ? advanceCheckbox.checked : false;
 
             const CirCheckbox = document.getElementById("circleModeCheckbox");
-            const isCirMode = circleModeCheckbox ? circleModeCheckbox.checked : false;
+            const isCirMode = CirCheckbox ? CirCheckbox.checked : false;
 
             for (let i = 0; i < lines.length; i++) {
-                newText += lines[i] + "\n"; // Add current line
+                const line = lines[i];
+                newText += line + "\n";
 
-                if (lines[i].trim().startsWith("!")) {
-                    // If the current line is a comment
-                    if (i + 1 < lines.length && lines[i + 1].includes("MoveJ")) {
-                        if (isAdvanceMode) {
-                            newText += `    <span class="highlight">${uf_adj}:=Modify_DYN_Wobj_Offset(${uf},0,0,0,0,0,0);</span>\n`;  // Add Modify_Adj; if checkbox is checked
-                        }
-                        if (lines[i].trim().startsWith("! --- Cir") && isCirMode){
-                            newText += `    <span class="highlight">Laser_Speed_Param_In 25;</span>\n`;  // Insert Laser_Speed_Param_In 25;
-                        }
-                        else{
-                            newText += `    <span class="highlight">Laser_Speed_Param_In ${laser_spd_par};</span>\n`;  // Insert Laser_Speed_Param_In 1;
-                        }
+                // Check for new section
+                if (line.trim().startsWith("! ---")) {
+                    currentSection = line.replace("! ---", "").replace(/---/g, "").trim().toLowerCase();
+                }
+
+                // Inject Laser_Speed_Param_In after comment + MoveJ
+                if (line.trim().startsWith("!") && i + 1 < lines.length && lines[i + 1].includes("MoveJ")) {
+                    const param = paramMap[currentSection] || laser_spd_par; // Default to 1 if no match
+
+                    if (isAdvanceMode) {
+                        newText += `    <span class="highlight">${uf_adj}:=Modify_DYN_Wobj_Offset(${uf},0,0,0,0,0,0);</span>\n`;
+                    }
+
+                    if (line.trim().startsWith("! --- Cir") && isCirMode) {
+                        newText += `    <span class="highlight">Laser_Speed_Param_In 25;</span>\n`;
+                    } else {
+                        newText += `    <span class="highlight">Laser_Speed_Param_In ${param};</span>\n`;
                     }
                 }
             }
+
             return newText;
         }
 
         // Function to add Laser_Punch_Param_In 1; after MoveL when before MoveL is MoveJ and after MoveL is another MoveL
-        function addLaserPunchParam(text,laser_pch_par) {
+        function addLaserPunchParam(text,paramMap,laser_pch_par) {
             const lines = text.split("\n");
             let newText = "";
+            let currentSection = "";
 
             const CirCheckbox = document.getElementById("circleModeCheckbox");
-            const isCirMode = circleModeCheckbox ? circleModeCheckbox.checked : false;
+            const isCirMode = CirCheckbox ? CirCheckbox.checked : false;
 
             for (let i = 0; i < lines.length; i++) {
-                newText += lines[i] + "\n"; // Add current line
+                const line = lines[i];
+                newText += line + "\n";
 
-                // Check if the current line is a MoveL
-                if (lines[i].trim().startsWith("MoveL")) {
-                    // Check if the previous line is a MoveJ and the next line is another MoveL
-                    if (i > 0 && lines[i - 5].trim().startsWith("! --- Cir") && isCirMode && lines[i - 1].trim().startsWith("MoveJ") && i + 1 < lines.length && lines[i + 1].trim().startsWith("MoveL")){
-                        newText += `    <span class="highlight">Laser_Punch_Cir_Param_In 25;</span>\n`; 
-                    } else if (i > 0 && lines[i - 6].trim().startsWith("! --- Cir") && isCirMode && lines[i - 1].trim().startsWith("MoveJ") && i + 1 < lines.length && lines[i + 1].trim().startsWith("MoveL")){
-                        newText += `    <span class="highlight">Laser_Punch_Cir_Param_In 25;</span>\n`; 
-                    } else if (i > 0 && lines[i - 7].trim().startsWith("! --- Cir") && isCirMode && lines[i - 1].trim().startsWith("MoveJ") && i + 1 < lines.length && lines[i + 1].trim().startsWith("MoveL")){
-                        newText += `    <span class="highlight">Laser_Punch_Cir_Param_In 25;</span>\n`; 
-                    } else if (i > 0 && lines[i - 1].trim().startsWith("MoveJ") && i + 1 < lines.length && lines[i + 1].trim().startsWith("MoveL")) {
-                        newText += `    <span class="highlight">Laser_Punch_Param_In ${laser_pch_par};</span>\n`; 
-                    } 
+                // Track current section title
+                if (line.trim().startsWith("! ---")) {
+                    currentSection = line.replace("! ---", "").replace(/---/g, "").trim().toLowerCase();
+                }
 
+                if (line.trim().startsWith("MoveL")) {
+                    const param = paramMap[currentSection] || laser_pch_par; // Default to 1 if not found
+
+                    const prevLine = i > 0 ? lines[i - 1].trim() : "";
+                    const prevLine5 = i > 4 ? lines[i - 5].trim() : "";
+                    const prevLine6 = i > 5 ? lines[i - 6].trim() : "";
+                    const prevLine7 = i > 6 ? lines[i - 7].trim() : "";
+                    const nextLine = i + 1 < lines.length ? lines[i + 1].trim() : "";
+
+                    if (
+                        isCirMode &&
+                        ((prevLine5.startsWith("! --- Cir") || prevLine6.startsWith("! --- Cir") || prevLine7.startsWith("! --- Cir")) &&
+                         prevLine.startsWith("MoveJ") &&
+                         nextLine.startsWith("MoveL"))
+                    ) {
+                        newText += `    <span class="highlight">Laser_Punch_Cir_Param_In 25;</span>\n`;
+                    } else if (
+                        prevLine.startsWith("MoveJ") &&
+                        nextLine.startsWith("MoveL")
+                    ) {
+                        newText += `    <span class="highlight">Laser_Punch_Param_In ${param};</span>\n`;
+                    }
                 }
             }
+
             return newText;
         }
 
         // Function to add Laser_Punch_Param_In 1; after MoveL when before MoveL is Laser_Punch_Param_In and after MoveL is another MoveL
-        function addLaserProcessParam(text,laser_prc_par) {
+        function addLaserProcessParam(text,paramMap,laser_prc_par) {
             const lines = text.split("\n");
             let newText = "";
+            let currentSection = "";
 
             for (let i = 0; i < lines.length; i++) {
-                newText += lines[i] + "\n"; // Add current line
+                const line = lines[i];
+                newText += line + "\n";
 
-                // Check if the current line is a MoveL
-                if (lines[i].trim().startsWith("MoveL")) {
-                    // Check if the previous line is a MoveJ and the next line is another MoveL
-                    if (i > 0 && lines[i - 1].trim().startsWith(`<span class="highlight">Laser_Punch_Cir_`) && i + 1 < lines.length && lines[i + 1].trim().startsWith("MoveL")) {
+                // Track current section title
+                if (line.trim().startsWith("! ---")) {
+                    currentSection = line.replace("! ---", "").replace(/---/g, "").trim().toLowerCase();
+                }
+
+                if (line.trim().startsWith("MoveL")) {
+                    const prevLine = i > 0 ? lines[i - 1].trim() : "";
+                    const nextLine = i + 1 < lines.length ? lines[i + 1].trim() : "";
+                    const param = paramMap[currentSection] || laser_prc_par; // Default to 1
+
+                    if (prevLine.startsWith(`<span class="highlight">Laser_Punch_Cir_`) && nextLine.startsWith("MoveL")) {
                         newText += `    <span class="highlight">Laser_Process_Param_In 25;</span>\n`;
-                        // Insert Laser_Punch_Param_In 1;
-                    } else if (i > 0 && lines[i - 1].trim().startsWith(`<span class="highlight">Laser_Punch_`) && i + 1 < lines.length && lines[i + 1].trim().startsWith("MoveL")) {
-                        newText += `    <span class="highlight">Laser_Process_Param_In ${laser_prc_par};</span>\n`;
-                        // Insert Laser_Punch_Param_In 1;
+                    } else if (prevLine.startsWith(`<span class="highlight">Laser_Punch_`)  && nextLine.startsWith("MoveL")){
+                        newText += `    <span class="highlight">Laser_Process_Param_In ${param};</span>\n`;
                     }
                 }
             }
+
             return newText;
         }
 
@@ -921,7 +960,71 @@
           document.getElementById('myModal').style.display = 'none';
         }
 
+        function displayCommentTable(text) {
+            const lines = text.split("\n");
+            const tableBody = document.getElementById("commentTableBody");
+            tableBody.innerHTML = ""; // Clear previous content
 
+            let count = 1;
+            lines.forEach(line => {
+                const trimmedLine = line.trim();
+
+                if (trimmedLine.startsWith("! ---")) {
+                    // Remove "! ---" and "---" to get pure label
+                    const content = trimmedLine.replace("! ---", "").replace(/---/g, "").trim();
+
+                    // Skip "Home" (case-insensitive)
+                    if (content.toLowerCase() === "home") return;
+
+                    console.log(line);
+
+                    const row = document.createElement("tr");
+
+                    // Index column
+                    const indexCell = document.createElement("td");
+                    indexCell.textContent = count++;
+
+                    // Comment content column
+                    const commentCell = document.createElement("td");
+                    commentCell.textContent = trimmedLine;
+
+                    // Editable parameter input
+                    const parameterCell = document.createElement("td");
+                    const input = document.createElement("input");
+                    input.type = "text";
+                    input.placeholder = "Parameter...";
+                    input.style.width = "100px";
+
+                    parameterCell.appendChild(input);
+
+                    // Append to row
+                    row.appendChild(indexCell);
+                    row.appendChild(commentCell);
+                    row.appendChild(parameterCell);
+                    tableBody.appendChild(row);
+                }
+            });
+
+            document.getElementById("commentTableContainer").style.display = count > 1 ? "block" : "none";
+        }
+
+        function getParameterMapFromTable() {
+            const table = document.getElementById("commentTableBody");
+            const rows = table.getElementsByTagName("tr");
+            const paramMap = {}; // key = section title, value = parameter
+
+            for (let i = 0; i < rows.length; i++) {
+                const commentText = rows[i].children[1].textContent; // "! --- Section ---"
+                const section = commentText.replace("! ---", "").replace(/---/g, "").trim();
+                const input = rows[i].children[2].querySelector("input");
+                const parameter = input ? input.value.trim() : "";
+
+                if (section && parameter !== "") {
+                    paramMap[section.toLowerCase()] = parameter;
+                }
+            }
+            return paramMap;
+        }
         
     </script>
 </body>
