@@ -720,8 +720,8 @@
 
                 document.getElementById("processedContent").textContent = processedText;
                 document.getElementById("processedContent").innerHTML = processedText;
-                updateSectionNavigation(processed);
-                renderProcessedContent(processed);
+                updateSectionNavigation(processedText);
+                renderProcessedContent(processedText);
             } else {
                 showMatrixAlert();
                 alert("Please upload a file first.");
