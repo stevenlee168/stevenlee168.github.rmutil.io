@@ -257,6 +257,9 @@
           gap: 20px;
         }
 
+        .current-highlight {
+            background-color: #8bf1dc;
+        }
 
     </style>
 </head>
@@ -283,8 +286,8 @@
                 <option value="v100">v100</option>
                 <option value="v200">v200</option>
                 <option value="v300">v300</option>
-                <option value="v400">v400</option>
                 <option value="v500">v500</option>
+                <option value="v800">v800</option>
             </select>
         </div>
         <div>
@@ -293,8 +296,8 @@
                 <option value="v100">v100</option>
                 <option value="v200">v200</option>
                 <option value="v300">v300</option>
-                <option value="v400">v400</option>
                 <option value="v500">v500</option>
+                <option value="v800">v800</option>
             </select>
         </div>
         <div>
@@ -305,8 +308,8 @@
                 <option value="v100">v100</option>
                 <option value="v200">v200</option>
                 <option value="v300">v300</option>
-                <option value="v400">v400</option>
                 <option value="v500">v500</option>
+                <option value="v800">v800</option>
             </select>
         </div>
         <div>
@@ -384,18 +387,27 @@
     </div>
     
     <div class="container">
-        <div>
-            <h3>Uploaded File</h3>
+        <div style="flex: 1;">
+            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                <h3 style="margin: 0;">Uploaded File</h3>
+            </div>
             <div class="window" id="uploadWindow">
                 <pre id="fileContent"></pre>
             </div>
         </div>
-        <div>
-            <h3>Processed File</h3>
+
+        <!-- Processed File Panel -->
+        <div style="flex: 1;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                <h3 style="margin: 0;">Processed File</h3>
+                <button onclick="goToPreviousSection()" title="Previous Section">&#10232;</button>
+                <button onclick="goToNextSection()" title="Next Section">&#10233;</button>
+            </div>
             <div class="window" id="processWindow">
                 <pre id="processedContent"></pre>
             </div>
         </div>
+        
         <div id="commentTableContainer" style="display: none;">
             <h3>Parameters</h3>
             <div style="max-height: 300px; overflow-y: auto; border: 5px solid #ccc;">
@@ -706,6 +718,8 @@
 
                 document.getElementById("processedContent").textContent = processedText;
                 document.getElementById("processedContent").innerHTML = processedText;
+                updateSectionNavigation(processed);
+                renderProcessedContent(processed);
             } else {
                 showMatrixAlert();
                 alert("Please upload a file first.");
@@ -990,6 +1004,7 @@
 
                     // Skip "Home" (case-insensitive)
                     if (content.toLowerCase() === "home") return;
+                    if (content.toLowerCase().startsWith("transition")) return;
 
                     console.log(line);
 
@@ -1039,6 +1054,83 @@
                 }
             }
             return paramMap;
+        }
+
+        function updateSectionNavigation(text) {
+            const lines = text.split("\n");
+            sectionPositions = [];
+
+            lines.forEach((line, index) => {
+                if (line.trim().startsWith("! ---")) {
+                    sectionPositions.push(index);
+                }
+                else if (line.trim().startsWith("Stop;")){
+                    sectionPositions.push(index+1);
+                }
+            });
+
+            currentSectionIndex = -1;
+            console.log(sectionPositions);
+        }
+
+        function goToNextSection() {
+            if (sectionPositions.length === 0) return;
+            currentSectionIndex = (currentSectionIndex + 1) % sectionPositions.length;
+            scrollToSection(sectionPositions[currentSectionIndex]);
+        }
+
+        function goToPreviousSection() {
+            if (sectionPositions.length === 0) return;
+            currentSectionIndex = (currentSectionIndex - 1 + sectionPositions.length) % sectionPositions.length;
+            scrollToSection(sectionPositions[currentSectionIndex]);
+        }
+
+        // Scroll to section by index
+        function scrollToSection(lineIndex) {
+            const lineSpan = document.querySelector(`#processedContent span[data-line-index="${lineIndex}"]`);
+
+            // Remove old highlight
+            document.querySelectorAll("#processedContent .current-highlight")
+                .forEach(span => span.classList.remove("current-highlight"));
+
+            if (lineSpan) {
+                lineSpan.classList.add("current-highlight");
+                lineSpan.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+        }
+
+        function renderProcessedContent(text) {
+            const lines = text.split("\n");
+            const contentDiv = document.getElementById("processedContent");
+            contentDiv.innerHTML = ""; // Clear old content
+
+            lines.forEach((line, index) => {
+                const lineSpan = document.createElement("span");
+                lineSpan.setAttribute("data-line-index", index); // 🔥 Store line number
+
+                const highlightedLine = applyHighlight(line); // This might return HTML
+                lineSpan.innerHTML = highlightedLine + "\n";
+
+                contentDiv.appendChild(lineSpan);
+            });
+
+            updateSectionNavigation(text);
+        }
+
+        function applyHighlight(line) {
+            const trimmed = line.trim();
+
+            // Only highlight if line starts with "Laser_"
+            // OR contains "wobj" as a separate word (not part of another word)
+            const startsWithLaser = trimmed.startsWith("Laser_");
+            const startsWithLaserC = trimmed.startsWith("!Laser_");
+            const containsWobj = trimmed.startsWith("wobj"); // e.g., wobj, wobj0, wobjLaser
+
+            if (startsWithLaser || containsWobj || startsWithLaserC) {
+                return `<span class="highlight">${line}</span>`;
+            }
+
+            return line;
         }
         
     </script>
