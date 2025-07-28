@@ -322,6 +322,23 @@
                 <pre id="processedContent"></pre>
             </div>
         </div>
+
+        <div id="ToolTableContainer" style="display: none;"> 
+        <h3>Tool List</h3> 
+        <div style="max-height: 300px; overflow-y: auto; border: 5px solid #ccc;">
+            <table id="ToolTable" style="width: 300px; border-collapse: collapse;">
+                <thead style="background-color: #f0f0f0;">
+                    <tr>
+                        <th style="width: 20px;">#</th>
+                        <th style="width: 200px;">Tool</th>
+                        <th style="width: 120px;">Rename</th>
+                    </tr>
+                </thead>
+                <tbody id="ToolTableBody"></tbody> 
+            </table>
+        </div>
+    </div>
+
     </div>
 
     <div id="myModal">
@@ -495,6 +512,7 @@
                 reader.onload = function(event) {
                     uploadedText = event.target.result;
                     document.getElementById("fileContent").textContent = uploadedText;
+                    displayToolTable(uploadedText);
                 };
                 reader.readAsText(file);
             }
@@ -502,6 +520,8 @@
 
         function processFile() {
             if (uploadedText) {
+                // Step 1: Build rename map from tool table
+                const renameMap = buildRenameMap();
                 let speedMoveAbs = document.getElementById("moveAbs").value; 
                 let speedMoveJ = document.getElementById("moveJ").value;
                 let speedMoveL = document.getElementById("moveL").value;
@@ -511,49 +531,75 @@
                 let zoneMoveJ = document.getElementById("zoneJ").value;
                 let zoneMoveL = document.getElementById("zoneL").value;
                 let zoneMoveC = document.getElementById("zoneC").value;
-                let tool = document.getElementById("tool").value + '_Adj';
                 let selectedWobj = document.getElementById("userframe").value;
-                let tool_adj = document.getElementById("tool").value + '_Adj';
-                let tool_og = document.getElementById("tool").value;
 
                 let processedText = uploadedText.replace(/PERS.*/g, '!===============================================================');
 
-                console.log(tool_og);
+                processedText = addToolAdj(processedText);
 
+                // Step 2: Replace tool references in uploadedText
+                processedText = processedText.replace(/(\btool\w+)(\\Wobj:=)/g, (match, toolName, wobjPart) => {
+                    if (renameMap.has(toolName)) {
+                        return renameMap.get(toolName) + "_Adj" + wobjPart;
+                    }
+                    return match; // fallback to original if not renamed
+                });
+
+                processedText = processedText.replace(
+                    /(\btool\w+)_Adj\s*:=\s*Modify_TCP_Offset\(\s*(tool\w+)\s*,\s*0\s*,\s*0\s*,\s*0\s*,\s*0\s*,\s*0\s*,\s*0\s*\);/g,
+                    (match, adjName, baseName) => {
+                        if (renameMap.has(baseName)) {
+                            const renamed = renameMap.get(baseName);
+                            return `${renamed}_Adj:=Modify_TCP_Offset(${renamed},0,0,0,0,0,0);`;
+                        }
+                        return match; // fallback
+                    }
+                );
+
+
+                // Step 3: (Optional) Do other processing like speed/zone, etc.
+                // You can merge the rest of your original logic here.
                 // Update MoveAbsJ Speed and Zone
                 processedText = processedText.replace(
                     /MoveAbsJ\s+\[\[([^\]]+)\],\[([^\]]+)\]\],(\w+),(\w+),(\w+)\\Wobj:=(\w+);/g,
-                    `MoveAbsJ [[$1],[$2]],${speedMoveAbs},${zoneMoveAbs},${tool}\\Wobj:=${selectedWobj};`
+                    `MoveAbsJ [[$1],[$2]],${speedMoveAbs},${zoneMoveAbs},$5\\Wobj:=${selectedWobj};`
                 );
 
                 // Update MoveJ Speed and Zone
                 processedText = processedText.replace(
                     /MoveJ\s+\[\[([^\]]+)\],\[([^\]]+)\],\[([^\]]+)\],\[([^\]]+)\]\],\[[^\]]+\],(.*?),(\w+)\\Wobj:=(\w+);/g,
-                    `MoveJ [[$1],[$2],[$3],[$4]],${speedMoveJ},${zoneMoveJ},${tool}\\Wobj:=${selectedWobj};`
+                    `MoveJ [[$1],[$2],[$3],[$4]],${speedMoveJ},${zoneMoveJ},$6\\Wobj:=${selectedWobj};`
                 );
 
                 // Update MoveL Speed and Zone
                 processedText = processedText.replace(
                     /MoveL\s+\[\[([^\]]+)\],\[([^\]]+)\],\[([^\]]+)\],\[([^\]]+)\]\],\[[^\]]+\],(.*?),(\w+)\\Wobj:=(\w+);/g,
-                    `MoveL [[$1],[$2],[$3],[$4]],${speedMoveL},${zoneMoveL},${tool}\\Wobj:=${selectedWobj};`
+                    `MoveL [[$1],[$2],[$3],[$4]],${speedMoveL},${zoneMoveL},$6\\Wobj:=${selectedWobj};`
                 );
 
                 // Update MoveC Speed and Zone
                 processedText = processedText.replace(
                     /MoveC\s+\[\[([^\]]+)\],\[([^\]]+)\],\[([^\]]+)\],\[([^\]]+)\]\],\[\[([^\]]+)\],\[([^\]]+)\],\[([^\]]+)\],\[([^\]]+)\]\],\[[^\]]+\],(.*?),(\w+)\\Wobj:=(\w+);/g,
-                    `MoveC [[$1],[$2],[$3],[$4]],[[$5],[$6],[$7],[$8]],${speedMoveC},${zoneMoveC},${tool}\\Wobj:=${selectedWobj};`
+                    `MoveC [[$1],[$2],[$3],[$4]],[[$5],[$6],[$7],[$8]],${speedMoveC},${zoneMoveC},$10\\Wobj:=${selectedWobj};`
                 );
-
-                // Update Tool
-                //processedText = processedText.replace(/Tool:=\S+;/, `Tool:=${tool};`);
-
-                // Add Tool Adj if there's a comment
-                processedText = addToolAdj(processedText,tool_adj,tool_og);
-
                 processedText = addCopyrightNotice(processedText);
 
-                // Process comments to replace non-English content inside '!'
-                processedText = processComments(processedText);
+                // Update ActUnit line based on selection
+                if (selectedWobj === "wobj2") {
+                    // First deactivate STN1 and then activate STN2
+                    processedText = processedText.replace(/ActUnit STN1;/g, "DeactUnit STN1;\n    ActUnit STN2;");
+                } else {
+                    // First deactivate STN2 and then activate STN1
+                    processedText = processedText.replace(/ActUnit STN1;/g, "DeactUnit STN2;\n    ActUnit STN1;");
+                }
+
+                if (selectedWobj === "wobj2") {
+                    // First deactivate STN1 and then activate STN2
+                    processedText = processedText.replace(/DeactUnit STN1;\s*ENDPROC/g, "DeactUnit STN2;\n  ENDPROC");
+                } else {
+                    // First deactivate STN2 and then activate STN1
+                    processedText = processedText.replace(/DeactUnit STN1;\s*ENDPROC/g, "DeactUnit STN1;\n  ENDPROC");
+                }
 
                 document.getElementById("processedContent").textContent = processedText;
                 document.getElementById("processedContent").innerHTML = processedText;
@@ -563,37 +609,152 @@
             }
         }
 
-        // Function to check if a string contains non-English characters
-        function containsNonEnglishCharacters(str) {
-            return /[^\x00-\x7F]/.test(str);  // Checks for non-ASCII characters
-        }
+        function buildRenameMap() {
+            const tableBody = document.getElementById("ToolTableBody");
+            const rows = tableBody.querySelectorAll("tr");
+            const renameMap = new Map();
 
-        // Replace the content inside '!' comment if it contains non-English characters
-        function processComments(text) {
-            return text.replace(/!([^!]+)!/g, function(match, content) {
-                if (containsNonEnglishCharacters(content)) {
-                    const updatedContent = content.replace(/^[^\x00-\x7F]+/, '').trim();
-                    return `! undefine language ${updatedContent} !`;  // Replace with "undefine language"
-                } else {
-                    return match;
+            // Get fallback tool name (from manual input)
+            const fallbackToolName = document.getElementById("tool")?.value.trim();
+
+            rows.forEach(row => {
+                const originalToolName = row.children[1].textContent.trim();  // Column 2: original name
+                const renameInput = row.children[2].querySelector("input");
+                let newName = renameInput?.value.trim();
+
+                // Fallback if no input or input is empty
+                if (!newName) {
+                    newName = fallbackToolName;
+                }
+
+                // Only set if we have a name
+                if (newName) {
+                    renameMap.set(originalToolName, newName);
                 }
             });
+
+            return renameMap;
         }
 
+        function displayToolTable(text) {
+            const tableBody = document.getElementById("ToolTableBody");
+            tableBody.innerHTML = ""; // Clear previous rows
+            const lines = text.split("\n");
+
+            let count = 1;
+            let toolFound = false;
+
+            for (let line of lines) {
+                const match = line.match("  PERS tooldata");///^PERS\s+tooldata\s+(\w+)\s*:=\s*(\[.*\])\s*;?/);
+                if (match) {
+                    //const array_A = match
+                    const toolName = match.input.split(":=")[0].split(" ")[4];
+
+                    const row = document.createElement("tr");
+
+                    // Index column
+                    const indexCell = document.createElement("td");
+                    indexCell.textContent = count++;
+
+                    // Tool content column
+                    const toolNameCell = document.createElement("td");
+                    toolNameCell.textContent = toolName;
+
+                    // Editable parameter input
+                    const RenameCell = document.createElement("td");
+                    const input = document.createElement("input");
+                    input.type = "text";
+                    input.placeholder = "Rename...";
+                    input.style.width = "100px";
+
+                    RenameCell.appendChild(input);
+
+                    // Append to row
+                    row.appendChild(indexCell);
+                    row.appendChild(toolNameCell);
+                    row.appendChild(RenameCell);
+                    tableBody.appendChild(row);
+
+                    toolFound = true;
+                }
+            }
+
+            // Show the container if tooldata was found
+            if (toolFound) {
+                document.getElementById("ToolTableContainer").style.display = "block";
+            } else {
+                document.getElementById("ToolTableContainer").style.display = "none";
+            }
+        }
+
+        function getRenameMap() {
+            const renameMap = {};
+            const table = document.getElementById("ToolTable");
+            if (!table) return renameMap;
+
+            for (let i = 1; i < table.rows.length; i++) {
+                const cells = table.rows[i].cells;
+                const oldName = cells[1].textContent.trim();   // Original tool name
+                const input = cells[2].querySelector("input"); // Rename input
+                const newName = input ? input.value.trim() : "";
+
+                if (oldName && newName && oldName !== newName) {
+                    renameMap[oldName] = newName;
+                }
+            }
+
+            return renameMap;
+        }
+
+
         // Function to add Tool_Adj:=Modify_rTCP_Offset(Tool,0,0,0,0,0,0); after comments
-        function addToolAdj(text,tool_adj,tool_og) {
+        function addToolAdj(text) {
             const lines = text.split("\n");
             let newText = "";
+            let current_tool = "";
+            let tool_adj = "";
 
             for (let i = 0; i < lines.length; i++) {
                 newText += lines[i] + "\n"; // Add current line
 
+
                 if (lines[i].trim().startsWith("! ---")) {
+                    if(lines[i+1].trim().startsWith("MoveAbsJ")){
+                        current_tool=lines[i+1].split(",")[14].split("\\")[0];
+                        tool_adj= current_tool+"_Adj";
+                    }
+                    else if(lines[i+1].trim().startsWith("MoveJ")){
+                        current_tool=lines[i+1].split(",")[22].split("\\")[0];
+                        tool_adj= current_tool+"_Adj";
+                    }
+                    else if(lines[i+1].trim().startsWith("MoveL")){
+                        current_tool=lines[i+1].split(",")[22].split("\\")[0];
+                        tool_adj= current_tool+"_Adj";
+                    }
+                    
                     // If the current line is a comment
-                        newText += `    <span class="highlight">${tool_adj}:=Modify_TCP_Offset(${tool_og},0,0,0,0,0,0);</span>\n`;  // Insert Tool_Adj:=Modify_rTCP_Offset(Tool,0,0,0,0,0,0);
+                        newText += `    <span class="highlight">${tool_adj}:=Modify_TCP_Offset(${current_tool},0,0,0,0,0,0);</span>\n`;  // Insert Tool_Adj:=Modify_rTCP_Offset(Tool,0,0,0,0,0,0);
                 }
             }
             return newText;
+        }
+
+        function applyToolRenames(originalText) {
+            const tableBody = document.getElementById("ToolTableBody");
+            const rows = tableBody.querySelectorAll("tr");
+            let updatedText = originalText;
+
+            rows.forEach((row) => {
+                const toolName = row.cells[1].textContent.trim();  // Original tool name like 'tool5'
+                const newName = row.cells[2].querySelector("input").value.trim(); // New name input
+
+                if (newName && newName !== toolName) {
+                    const regex = new RegExp(`\\b${toolName}\\b`, 'g');
+                    updatedText = updatedText.replace(regex, newName);
+                }
+            });
+
+            return updatedText;
         }
 
         function addCopyrightNotice(processedText) {
@@ -685,10 +846,7 @@
 
         function closeModal() {
           document.getElementById('myModal').style.display = 'none';
-        }
-
-
-        
+        }      
     </script>
 </body>
 </html>
