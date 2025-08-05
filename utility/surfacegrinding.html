@@ -601,11 +601,11 @@
                 });
 
                 processedText = processedText.replace(
-                    /(\btool\w+)_Adj\s*:=\s*Modify_TCP_Offset\(\s*(tool\w+)\s*,\s*0\s*,\s*0\s*,\s*0\s*,\s*0\s*,\s*0\s*,\s*0\s*\);/g,
+                    /(\btool\w+)_Adj\s*:=\s*Modify_TCP_Offset\(\s*(tool\w+)\s*,\s*0\s*,\s*0\s*,\s*(\w+)\s*,\s*0\s*,\s*0\s*,\s*0\s*\);/g,
                     (match, adjName, baseName) => {
                         if (renameMap.has(baseName)) {
                             const renamed = renameMap.get(baseName);
-                            return `${renamed}_Adj:=Modify_TCP_Offset(${renamed},0,0,0,0,0,0);`;
+                            return `${renamed}_Adj:=Modify_TCP_Offset(${renamed},0,0,D_high,0,0,0);`;
                         }
                         return match; // fallback
                     }
@@ -794,7 +794,7 @@
                     }
                     
                     // If the current line is a comment
-                        newText += `    <span class="highlight">${tool_adj}:=Modify_TCP_Offset(${current_tool},0,0,0,0,0,0);</span>\n`;  // Insert Tool_Adj:=Modify_rTCP_Offset(Tool,0,0,0,0,0,0);
+                        newText += `    <span class="highlight">${tool_adj}:=Modify_TCP_Offset(${current_tool},0,0,D_high,0,0,0);</span>\n`;  // Insert Tool_Adj:=Modify_rTCP_Offset(Tool,0,0,0,0,0,0);
                 }
             }
             return newText;
@@ -1044,5 +1044,6 @@
     </script>
 </body>
 </html>
+
 
 
